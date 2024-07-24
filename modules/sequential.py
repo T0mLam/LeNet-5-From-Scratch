@@ -1,17 +1,28 @@
+from typing import Any, List
+
 import numpy as np
+from nptyping import Number, NDArray, Shape
 from tqdm import tqdm
+
+from .layer import Layer
 
 
 class Sequential:
-    def __init__(self, blocks):
+    def __init__(self, blocks: List[Layer]) -> None:
         self.blocks = blocks
 
-    def forward(self, X):
+    def forward(
+        self, 
+        X: NDArray[Any, Number]
+    ) -> NDArray[Any, Number]:
         for block in self.blocks:
             X = block(X)
         return X
 
-    def backward(self, grad):
+    def backward(
+        self, 
+        grad: NDArray[Any, Number]
+    ) -> None:
         for block in reversed(self.blocks):
             grad = block.backward(grad)
     
@@ -41,7 +52,8 @@ def train(
             lbound, ubound = i * batch_size, (i + 1) * batch_size
             X = X_train[lbound: ubound]
             y = y_train[lbound: ubound]
-            y_pred = model(X.reshape(batch_size, -1))
+            #y_pred = model(X.reshape(batch_size, -1))
+            y_pred = model(X)
             correct += np.sum(np.argmax(y_pred, axis=1) == y)
             loss += criterion(y, y_pred)
             grad = criterion.backward()
@@ -51,7 +63,7 @@ def train(
         acc = correct / len(y_train)
         acc_list.append(acc)
         loss_list.append(loss)
-        print(f'\nAccuracy: {acc} | Loss: {loss}')
+        print(f'Accuracy: {acc} | Loss: {loss}')
 
     return acc_list, loss_list
 

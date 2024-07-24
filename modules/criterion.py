@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
 
 import numpy as np
+from nptyping import NDArray
 
 
 class Loss(ABC):
     @abstractmethod
-    def forward(self, y, y_pred):
+    def forward(self, y: NDArray, y_pred: NDArray):
         pass
 
     @abstractmethod

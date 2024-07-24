@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from keras.datasets.mnist import load_data
 
-from modules.layer import Linear, Flatten
+from modules.layer import Linear, Conv, Flatten
 from modules.activation import ReLU, SoftMax, Tanh
 from modules.criterion import MSE, CrossEntropy
 from modules.optimizer import GradDesc
@@ -16,11 +16,14 @@ X_test = (X_test - 127.5) / 127.5
 init_method = Kaiming()
 
 model = Sequential([
-    Linear(28 * 28, 64, init_method),
+    Conv(1, 8, 4),
     ReLU(),
-    Linear(64, 32, init_method),
+    Conv(8, 8, 4),
     ReLU(),
-    Linear(32, 10, init_method),
+    Flatten(),
+    Linear(22 * 22 * 8, 64, init_method),
+    ReLU(),
+    Linear(64, 10, init_method),
     SoftMax()
 ])
 
@@ -28,12 +31,13 @@ criterion = CrossEntropy()
 optimizer = GradDesc(model, lr=0.01)
 
 train_acc, train_loss = train(
-    model, X_train, y_train, criterion, optimizer, 50, 200
+    model, X_train, y_train, criterion, optimizer, 5, 800
 )
 
 plt.plot(train_acc)
 plt.show()
 
+"""
 acc = 0
 for i in range(len(X_test)):
     pred = model(X_test[i].reshape(1, 784)).argmax()
@@ -46,3 +50,4 @@ test_acc = test(
     model, X_test, y_test, 200
 )
 print(test_acc)
+"""
