@@ -95,4 +95,44 @@ class Conv(Layer):
         for b in range(self.batch_size):
             for i in range(self.out_channel):
                 for j in range(self.in_channel):
-     
+                    self.Y[b, i] = signal.correlate2d(
+                        self.X[b, j], self.K[i, j], mode='valid'
+                    )
+                
+        return self.Y
+
+    def backward(
+        self, 
+        grad: NDArray[Shape["*, *, *, *"], Number]
+    ) -> NDArray[Shape["*, *, *, *"], Number]:
+        self.dK = np.random.randn(*self.kernel_shape)
+        self.db = np.copy(grad)
+        self.out_grad = np.zeros(self.in_shape)
+
+        for b in range(self.batch_size):
+            for i in range(self.out_channel):
+                for j in range(self.in_channel):
+                    self.dK[i, j] = signal.correlate2d(
+                        self.X[b, j], grad[b, i], mode='valid'
+                    )
+                    self.out_grad[j] += signal.convolve2d(
+                        grad[b, i], self.K[i, j], mode='full'
+                    )
+
+        return self.out_grad
+
+
+class Flatten(Layer):
+    def forward(
+        self,
+        X: NDArray[Shape['*, *, ...'], Number]
+    ) -> NDArray[Shape['*, *'], Number]:
+        self.X_shape = X.shape
+        self.batch_size, *self.feature_dim = self.X_shape
+        return X.reshape((self.batch_size, np.prod(self.feature_dim)))
+
+    def backward(
+        self, 
+        grad: NDArray[Shape['*, *'], Number]
+    ) -> NDArray[Shape['*, *, ...'], Number]:
+        return grad.reshape(self.X_shape)

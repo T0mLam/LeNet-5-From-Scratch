@@ -23,4 +23,9 @@ class GradDesc(Optimizer):
                 block.b -= self.lr * block.db
 
             if isinstance(block, Conv):
-                block.K -= s
+                block.K -= self.lr * block.dK
+                block.b -= self.lr * block.db
+
+
+class Adam(Optimizer):
+    pass
