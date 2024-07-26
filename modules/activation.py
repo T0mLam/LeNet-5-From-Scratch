@@ -9,7 +9,8 @@ from .layer import Layer
 class ReLU(Layer):
     def forward(
         self,
-        X: NDArray[Any, Number]
+        X: NDArray[Any, Number],
+        **kwargs
     ) -> NDArray[Any, Number]:
         self.X = X
         return np.maximum(0, X)
@@ -25,7 +26,8 @@ class ReLU(Layer):
 class Tanh(Layer):
     def forward(
         self,
-        X: NDArray[Any, Number]
+        X: NDArray[Any, Number],
+        **kwargs
     ) -> NDArray[Any, Number]:
         self.output = np.tanh(X)
         return self.output
@@ -40,7 +42,8 @@ class Tanh(Layer):
 class SoftMax(Layer):
     def forward(
         self,
-        X: NDArray[Shape['*, *'], Number]
+        X: NDArray[Shape['*, *'], Number],
+        **kwargs
     ) -> NDArray[Shape['*, *'], Number]:
         shift_X = X - np.max(X, axis=1, keepdims=True)
         exp_X = np.exp(shift_X)
@@ -51,3 +54,11 @@ class SoftMax(Layer):
         grad: NDArray[Any, Number]
     ) -> NDArray[Any, Number]:
         return grad
+    
+
+class Sigmoid(Layer):
+    pass
+
+
+class RBF(Layer):
+    pass

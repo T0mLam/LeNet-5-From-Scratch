@@ -1,3 +1,4 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Optional
 
@@ -5,12 +6,10 @@ import numpy as np
 from nptyping import Number, NDArray, Shape
 from scipy import signal
 
-from .init import Initialization
-
 
 class Layer(ABC):
     @abstractmethod
-    def forward(self, X: NDArray) -> NDArray:
+    def forward(self, X: NDArray, **kwargs) -> NDArray:
         pass
 
     @abstractmethod
@@ -36,7 +35,8 @@ class Linear(Layer):
     
     def forward(
             self,
-            X: NDArray[Shape["*, *"], Number]
+            X: NDArray[Shape["*, *"], Number],
+            **kwargs
         ) -> NDArray[Shape["*, *"], Number]:  
         self.X = X
         return self.X @ self.W.T + self.b
@@ -70,7 +70,8 @@ class Conv(Layer):
     
     def forward(
         self, 
-        X: NDArray[Shape["*, *, *, *"], Number]
+        X: NDArray[Shape["*, *, *, *"], Number],
+        **kwargs
     ) -> NDArray[Shape["*, *, *, *"], Number]:
         if len(X.shape) == 3:
             X = X.reshape((
@@ -103,7 +104,7 @@ class Conv(Layer):
 
     def backward(
         self, 
-        grad: NDArray[Shape["*, *, *, *"], Number]
+        grad: NDArray[Shape["*, *, *, *"], Number],
     ) -> NDArray[Shape["*, *, *, *"], Number]:
         self.dK = np.random.randn(*self.kernel_shape)
         self.db = np.copy(grad)
@@ -125,7 +126,8 @@ class Conv(Layer):
 class Flatten(Layer):
     def forward(
         self,
-        X: NDArray[Shape['*, *, ...'], Number]
+        X: NDArray[Shape['*, *, ...'], Number],
+        **kwargs
     ) -> NDArray[Shape['*, *'], Number]:
         self.X_shape = X.shape
         self.batch_size, *self.feature_dim = self.X_shape

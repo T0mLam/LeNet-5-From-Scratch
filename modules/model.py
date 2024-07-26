@@ -1,22 +1,22 @@
-from typing import Any, List
+from __future__ import annotations
+from typing import Any, List, Tuple    
 
 import numpy as np
 from nptyping import Number, NDArray, Shape
 from tqdm import tqdm
 
-from .layer import Layer
-
 
 class Sequential:
     def __init__(self, blocks: List[Layer]) -> None:
         self.blocks = blocks
+        self.is_training = True    
 
     def forward(
         self, 
         X: NDArray[Any, Number]
     ) -> NDArray[Any, Number]:
         for block in self.blocks:
-            X = block(X)
+            X = block(X, train=self.is_training)
         return X
 
     def backward(
@@ -25,23 +25,30 @@ class Sequential:
     ) -> None:
         for block in reversed(self.blocks):
             grad = block.backward(grad)
+
+    def train(self) -> None:
+        self.is_training = True
+
+    def eval(self) -> None:
+        self.is_training = False
     
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
     
 
 def train(
-    model, 
-    X_train, 
-    y_train, 
-    criterion,
-    optimizer,
-    epochs,
-    batch_size
-):
+    model: Sequential, 
+    X_train: NDArray[Any, Number], 
+    y_train: NDArray[Any, Number], 
+    criterion: Loss,
+    optimizer: Optimizer,
+    epochs: int,
+    batch_size: int
+) -> Tuple[List[Number], List[Number]]:
     loss_list = []
     acc_list = []
     iterations = len(X_train) // batch_size
+    model.train()
 
     for epoch in range(epochs):
         print(f'\nEpoch {epoch + 1}')
@@ -69,13 +76,14 @@ def train(
 
 
 def test(
-    model,
-    X_test,
-    y_test,
-    batch_size
-):
+    model: Sequential,
+    X_test: NDArray[Any, Number],
+    y_test: NDArray[Any, Number],
+    batch_size: int
+) -> float:
     correct = 0
     iterations = len(X_test) // batch_size
+    model.eval()
 
     for i in tqdm(range(iterations), desc='Testing'):
         lbound, ubound = i * batch_size, (i + 1) * batch_size

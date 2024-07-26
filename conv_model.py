@@ -1,12 +1,14 @@
 import matplotlib.pyplot as plt
 from keras.datasets.mnist import load_data
 
-from modules.layer import Linear, Conv, Flatten
 from modules.activation import ReLU, SoftMax, Tanh
 from modules.criterion import MSE, CrossEntropy
-from modules.optimizer import GradDesc
-from modules.sequential import Sequential, train, test
 from modules.init import Kaiming
+from modules.layer import Linear, Conv, Flatten
+from modules.model import Sequential, train, test
+from modules.optimizer import GradDesc
+from modules.regularization import Dropout
+
 
 
 (X_train, y_train), (X_test, y_test) = load_data()
@@ -18,6 +20,7 @@ init_method = Kaiming()
 model = Sequential([
     Conv(1, 8, 4),
     ReLU(),
+    Dropout(0.2),
     Conv(8, 8, 4),
     ReLU(),
     Flatten(),
@@ -31,7 +34,7 @@ criterion = CrossEntropy()
 optimizer = GradDesc(model, lr=0.01)
 
 train_acc, train_loss = train(
-    model, X_train, y_train, criterion, optimizer, 5, 800
+    model, X_train, y_train, criterion, optimizer, 3, 1600
 )
 
 plt.plot(train_acc)

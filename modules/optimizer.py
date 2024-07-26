@@ -1,8 +1,8 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
 
 from .layer import Linear, Conv
 
-from .sequential import Sequential
 
 
 class Optimizer(ABC):

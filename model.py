@@ -5,7 +5,7 @@ from modules.layer import Linear, Flatten
 from modules.activation import ReLU, SoftMax, Tanh
 from modules.criterion import MSE, CrossEntropy
 from modules.optimizer import GradDesc
-from modules.sequential import Sequential, train, test
+from modules.model import Sequential, train, test
 from modules.init import Kaiming
 
 

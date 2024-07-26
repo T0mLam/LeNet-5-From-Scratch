@@ -27,4 +27,15 @@ class Kaiming(Initialization):
     
 
 class Xavier(Initialization):
-    pass
+    def __call__(
+            self,
+            in_dim: int,
+            out_dim: int
+        ) -> Tuple[
+            NDArray[Shape["*, *"], Float],
+            NDArray[Shape["*"], Float]
+        ]:
+        var = np.sqrt(6 / (in_dim + out_dim))
+        W = np.random.uniform(-var, var, size=(out_dim, in_dim))
+        b = np.zeros(out_dim)
+        return W, b
