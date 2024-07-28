@@ -32,3 +32,7 @@ class Dropout(Layer):
         grad: NDArray[Any, Number]
     ) -> NDArray[Any, Number]:
         return grad * self.mask
+    
+
+class L2(Layer):
+    pass

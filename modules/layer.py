@@ -27,8 +27,11 @@ class Linear(Layer):
         out_dim: int, 
         init: Optional[Initialization]=None
     ) -> None:
+        self.in_dim = in_dim
+        self.out_dim = out_dim
+
         if init:
-            self.W, self.b = init(in_dim, out_dim)
+            self.W, self.b = init(self)
         else:
             self.W = np.random.randn(out_dim, in_dim)
             self.b = np.random.randn(out_dim)
@@ -55,7 +58,8 @@ class Conv(Layer):
         self,
         in_channel: int,
         out_channel: int, 
-        kernel_size: int
+        kernel_size: int,
+        init: Optional[Initialization]=None
     ) -> None:
         self.in_channel = in_channel
         self.out_channel = out_channel
@@ -66,7 +70,11 @@ class Conv(Layer):
             kernel_size,
             kernel_size
         )
-        self.K = np.random.randn(*self.kernel_shape)
+        
+        if init:
+            self.K = init(self)
+        else:
+            self.K = np.random.randn(*self.kernel_shape)
     
     def forward(
         self, 

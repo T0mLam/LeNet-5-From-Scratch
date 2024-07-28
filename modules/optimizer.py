@@ -4,7 +4,6 @@ from abc import ABC, abstractmethod
 from .layer import Linear, Conv
 
 
-
 class Optimizer(ABC):
     def __init__(self, model: Sequential, lr: float) -> None:
         self.model = model
