@@ -45,5 +45,15 @@ class CrossEntropy(Loss):
         return (self.y_pred - self.y_one_hot) / self.y.shape[0]
     
 
-class BinaryEntropy(Loss):
-    pass
+class BinaryCrossEntropy(Loss):
+    def forward(self, 
+        y: NDArray[Any, Number],
+        y_pred: NDArray[Any, Number]
+    ) -> float:
+        self.y = y
+        self.y_pred = y_pred.clip(min=1e-8)
+        return -np.mean(y * np.log(self.y_pred) + (1 - y) * np.log(1 - self.y_pred))
+
+    def backward(self) -> NDArray[Any, Number]:
+        epsilon = 1e-8
+        return (self.y_pred - self.y) / (self.y_pred * (1 - self.y_pred) + epsilon)

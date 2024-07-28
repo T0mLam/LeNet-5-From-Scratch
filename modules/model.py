@@ -1,10 +1,24 @@
 from __future__ import annotations
+from abc import ABC, abstractmethod
 from typing import Any, List, Tuple    
 
 import numpy as np
 from nptyping import Number, NDArray, Shape
 from tqdm import tqdm
 
+
+class Model(ABC):
+    @abstractmethod
+    def __init__(self) -> None:
+        pass
+    
+    @abstractmethod
+    def forward(self, x) -> NDArray[Any, Number]:
+        pass
+
+    def __call__(self, *args, **kwargs):
+        return self.forward(*args, **kwargs)
+    
 
 class Sequential:
     def __init__(self, blocks: List[Layer]) -> None:

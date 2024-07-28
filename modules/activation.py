@@ -57,7 +57,19 @@ class SoftMax(Layer):
     
 
 class Sigmoid(Layer):
-    pass
+    def forward(
+        self,
+        X: NDArray[Any, Number],
+        **kwargs
+    ) -> NDArray[Any, Number]:
+        self.output = 1 / (1 + np.exp(-X))
+        return self.output
+    
+    def backward(
+        self, 
+        grad: NDArray[Any, Number]
+    ) -> NDArray[Any, Number]:
+        return grad * self.output * (1 - self.output)
 
 
 class RBF(Layer):

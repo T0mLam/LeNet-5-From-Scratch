@@ -2,6 +2,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 
 from .layer import Linear, Conv
+from .normalization import BatchNorm
 
 
 class Optimizer(ABC):
@@ -21,9 +22,13 @@ class GradDesc(Optimizer):
                 block.W -= self.lr * block.dW
                 block.b -= self.lr * block.db
 
-            if isinstance(block, Conv):
+            elif isinstance(block, Conv):
                 block.K -= self.lr * block.dK
                 block.b -= self.lr * block.db
+
+            elif isinstance(block, BatchNorm):
+                block.gamma -= self.lr * block.dgamma
+                block.beta -= self.lr * block.dbeta
 
 
 class Adam(Optimizer):

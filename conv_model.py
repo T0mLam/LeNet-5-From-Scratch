@@ -8,6 +8,7 @@ from modules.layer import Linear, Conv, Flatten
 from modules.model import Sequential, train, test
 from modules.optimizer import GradDesc
 from modules.regularization import Dropout
+from modules.normalization import BatchNorm
 
 
 
@@ -19,9 +20,10 @@ init_method = Kaiming()
 
 model = Sequential([
     Conv(1, 8, 4),
+    BatchNorm(8),
     ReLU(),
-    Dropout(0.2),
     Conv(8, 8, 4),
+    BatchNorm(8),
     ReLU(),
     Flatten(),
     Linear(22 * 22 * 8, 64, init_method),
@@ -29,6 +31,8 @@ model = Sequential([
     Linear(64, 10, init_method),
     SoftMax()
 ])
+
+model.train()
 
 criterion = CrossEntropy()
 optimizer = GradDesc(model, lr=0.01)
