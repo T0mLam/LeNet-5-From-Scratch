@@ -4,7 +4,7 @@ from keras.datasets.mnist import load_data
 from modules.layer import Linear, Flatten
 from modules.activation import ReLU, SoftMax, Tanh
 from modules.criterion import MSE, CrossEntropy
-from modules.optimizer import GradDesc
+from modules.optimizer import GradDesc, Adam
 from modules.model import Sequential, train, test
 from modules.init import Kaiming
 
@@ -25,7 +25,7 @@ model = Sequential([
 ])
 
 criterion = CrossEntropy()
-optimizer = GradDesc(model, lr=0.01)
+optimizer = Adam(model, lr=0.01)
 
 train_acc, train_loss = train(
     model, X_train, y_train, criterion, optimizer, 50, 200

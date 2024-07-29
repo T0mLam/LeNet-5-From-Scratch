@@ -6,7 +6,7 @@ from modules.criterion import MSE, CrossEntropy
 from modules.init import Kaiming
 from modules.layer import Linear, Conv, Flatten
 from modules.model import Sequential, train, test
-from modules.optimizer import GradDesc
+from modules.optimizer import GradDesc, Adam
 from modules.regularization import Dropout
 from modules.normalization import BatchNorm
 
@@ -19,10 +19,10 @@ X_test = (X_test - 127.5) / 127.5
 init_method = Kaiming()
 
 model = Sequential([
-    Conv(1, 8, 4),
+    Conv((28, 28), 1600, 1, 8, 4),
     BatchNorm(8),
     ReLU(),
-    Conv(8, 8, 4),
+    Conv((25, 25), 1600, 8, 8, 4),
     BatchNorm(8),
     ReLU(),
     Flatten(),
@@ -35,7 +35,7 @@ model = Sequential([
 model.train()
 
 criterion = CrossEntropy()
-optimizer = GradDesc(model, lr=0.01)
+optimizer = Adam(model, lr=0.0001)
 
 train_acc, train_loss = train(
     model, X_train, y_train, criterion, optimizer, 3, 1600

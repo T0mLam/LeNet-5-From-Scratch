@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 from nptyping import Number, NDArray, Shape
@@ -56,11 +56,15 @@ class Linear(Layer):
 class Conv(Layer):
     def __init__(
         self,
+        shape: Tuple[int, int],
+        batch_size: int, 
         in_channel: int,
         out_channel: int, 
         kernel_size: int,
         init: Optional[Initialization]=None
     ) -> None:
+        self.shape = shape
+        self.batch_size = batch_size
         self.in_channel = in_channel
         self.out_channel = out_channel
         self.kernel_size = kernel_size
@@ -70,6 +74,14 @@ class Conv(Layer):
             kernel_size,
             kernel_size
         )
+        self.out_shape = (
+            self.batch_size, # batch size
+            self.out_channel,
+            self.shape[0] - self.kernel_size + 1, # height
+            self.shape[1] - self.kernel_size + 1 # width
+        )
+
+        self.b = np.random.randn(*self.out_shape)
         
         if init:
             self.K = init(self)
@@ -85,20 +97,9 @@ class Conv(Layer):
             X = X.reshape((
                 X.shape[0], 1, X.shape[1], X.shape[2]
             ))
-                
-        self.in_shape = X.shape
-        self.batch_size = self.in_shape[0]
-
-        self.out_shape = (
-            self.batch_size, # batch size
-            self.out_channel,
-            self.in_shape[2] - self.kernel_size + 1, # height
-            self.in_shape[3] - self.kernel_size + 1 # width
-        )
-
-        self.b = np.random.randn(*self.out_shape)
-
+        
         self.X = X
+        self.in_shape = X.shape
         self.Y = np.copy(self.b)
 
         for b in range(self.batch_size):
