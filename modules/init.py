@@ -43,9 +43,9 @@ class Xavier(Initialization):
             NDArray[Shape["*, *, *, *"], Float]
         ]:
         if isinstance(layer, Linear):
-            var = np.sqrt(6 / (self.in_dim + self.out_dim))
-            W = np.random.uniform(-var, var, size=(self.out_dim, self.in_dim))
-            b = np.zeros(self.out_dim)
+            var = np.sqrt(6 / (layer.in_dim + layer.out_dim))
+            W = np.random.uniform(-var, var, size=(layer.out_dim, layer.in_dim))
+            b = np.zeros(layer.out_dim)
             return W, b
         
         if isinstance(layer, Conv):
@@ -53,7 +53,3 @@ class Xavier(Initialization):
             var = np.sqrt(6 / (layer.in_channel * kernel_size + layer.out_channel * kernel_size))
             K = np.random.uniform(-var, var, size=layer.kernel_shape)
             return K
-        
-
-if __name__ == '__main__':
-    print(np.prod(np.array([[[[1, 2], [2, 3]]]])))

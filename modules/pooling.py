@@ -8,23 +8,27 @@ from .layer import Layer
 
 
 class Pool(Layer):
+    def __init__(
+        self,
+        kernel_size: int,
+        stride: Optional[int]=None
+    ) -> None:
+        if stride is None: 
+            stride = kernel_size
+        
+        self.kernel_size = kernel_size
+        self.stride = stride
+        
     def forward(
         self, 
         X: NDArray[Shape['*, *, *, *'], Number],
-        kernel_size: int,
-        stride: Optional[int]=None,
         train: bool=True
     ) -> NDArray[Shape['*, *, *, *'], Number]:
-        if stride is None: 
-            stride = kernel_size
-
         self.X = X
-        self.kernel_size = kernel_size
-        self.stride = stride
         self.batch_size, self.channels, self.height, self.width = X.shape
 
-        self.output_height = (self.height - kernel_size) // stride + 1
-        self.output_width = (self.width - kernel_size) // stride + 1
+        self.output_height = (self.height - self.kernel_size) // self.stride + 1
+        self.output_width = (self.width - self.kernel_size) // self.stride + 1
 
         self.Y = np.zeros((
             self.batch_size, self.channels, self.output_height, self.output_width
