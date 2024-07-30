@@ -70,7 +70,3 @@ class Sigmoid(Layer):
         grad: NDArray[Any, Number]
     ) -> NDArray[Any, Number]:
         return grad * self.output * (1 - self.output)
-
-
-class RBF(Layer):
-    pass

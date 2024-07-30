@@ -147,3 +147,11 @@ class Flatten(Layer):
         grad: NDArray[Shape['*, *'], Number]
     ) -> NDArray[Shape['*, *, ...'], Number]:
         return grad.reshape(self.X_shape)
+    
+
+class Reshape(Layer):
+    pass
+
+
+class RBF(Layer):
+    pass
