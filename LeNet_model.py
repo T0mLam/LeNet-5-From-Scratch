@@ -40,4 +40,33 @@ model = Sequential([
     Flatten(),
     Linear(120, 84, init_method), #f6
     Tanh(),
-    Linear(84, 10, 
+    Linear(84, 10, init_method), #output
+    SoftMax()
+])
+
+model.train()
+
+criterion = CrossEntropy()
+optimizer = Adam(model, lr=0.01)
+
+train_acc, train_loss = train(
+    model, X_train, y_train, criterion, optimizer, 3, 128
+)
+
+plt.plot(train_acc)
+plt.show()
+
+"""
+acc = 0
+for i in range(len(X_test)):
+    pred = model(X_test[i].reshape(1, 784)).argmax()
+    if pred == y_test[i]:
+        acc += 1
+
+print(f'Test accuracy: {acc / len(X_test) * 100}%')
+
+test_acc = test(
+    model, X_test, y_test, 200
+)
+print(test_acc)
+"""
