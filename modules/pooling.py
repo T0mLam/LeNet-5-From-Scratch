@@ -22,7 +22,8 @@ class Pool(Layer):
     def forward(
         self, 
         X: NDArray[Shape['*, *, *, *'], Number],
-        train: bool=True
+        train: bool=True,
+        **kwargs
     ) -> NDArray[Shape['*, *, *, *'], Number]:
         self.X = X
         self.batch_size, self.channels, self.height, self.width = X.shape

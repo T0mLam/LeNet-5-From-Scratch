@@ -61,8 +61,8 @@ class Conv(Layer):
         in_channel: int,
         out_channel: int, 
         kernel_size: int,
-        mapping: Optional[NDArray[Shape['*, *'], Number]]=None,
-        init: Optional[Initialization]=None
+        init: Optional[Initialization]=None,
+        mapping: Optional[NDArray[Shape['*, *'], Number]]=None
     ) -> None:
         self.shape = shape
         self.batch_size = batch_size
@@ -76,7 +76,7 @@ class Conv(Layer):
             kernel_size
         )
         self.out_shape = (
-            self.batch_size, # batch size
+            #self.batch_size, # batch size
             self.out_channel,
             self.shape[0] - self.kernel_size + 1, # height
             self.shape[1] - self.kernel_size + 1 # width
@@ -103,10 +103,14 @@ class Conv(Layer):
             X = X.reshape((
                 X.shape[0], 1, X.shape[1], X.shape[2]
             ))
-        
+
+        # override batch setting
+        if kwargs['train'] is False:
+            self.batch_size = X.shape[0]
+
         self.X = X
         self.in_shape = X.shape
-        self.Y = np.copy(self.b)
+        self.Y = np.array([np.copy(self.b) for _ in range(self.batch_size)])
 
         for b in range(self.batch_size):
             for i in range(self.out_channel):
@@ -127,7 +131,7 @@ class Conv(Layer):
         grad: NDArray[Shape["*, *, *, *"], Number],
     ) -> NDArray[Shape["*, *, *, *"], Number]:
         self.dK = np.random.randn(*self.kernel_shape)
-        self.db = np.copy(grad)
+        self.db = np.copy(np.mean(grad, axis=0))
         self.out_grad = np.zeros(self.in_shape)
 
         for b in range(self.batch_size):
@@ -167,13 +171,9 @@ class Flatten(Layer):
 
 class RBF(Layer):
     def __init__(
-        self, 
-        in_dim: int, 
-        out_dim: int, 
+        self,
         W: NDArray[Shape["*, *, *"], Number]
     ) -> None:
-        self.in_dim = in_dim
-        self.out_dim = out_dim
         self.W = W
 
     def forward(
@@ -183,28 +183,37 @@ class RBF(Layer):
         train: bool=True,
         **kwargs
     ) -> float:  
-        batch_size = self.X.shape[0]
-        self.Y = np.zeros(batch_size)
-
-        if y:
+        self.batch_size = X.shape[0]
+        self.X = X
+        self.Y = np.zeros(self.batch_size)
+        
+        if y is not None:
             self.y = y
         
-        for b in range(batch_size):
-            if train:
+        if train:
+            for b in range(self.batch_size):
                 bitmap = self.W[y[b]]
                 diff = X[b] - bitmap
                 self.Y[b] = np.sum(np.power(diff, 2))
-            else:
+            return self.Y
+        else:
+            for b in range(self.batch_size):
                 z = np.zeros(len(self.W))
                 for i, bitmap in enumerate(self.W):
                     diff = X[b] - bitmap
                     z[i] = np.sum(np.power(diff, 2))
                 self.Y[b] = z.argmin()
-    
-        return self.Y
+            return self.Y
 
     def backward(
         self,
         grad: NDArray[Shape["*, *"], Number]
     ) -> NDArray[Shape["*, *"], Number]:
-        pass
+        out_grad = np.zeros_like(self.X)
+       
+        for b in range(self.batch_size):    
+            bitmap = self.W[self.y[b]]
+            diff = self.X[b] - bitmap
+            out_grad[b] = grad[b] * diff * 2
+
+        return out_grad
