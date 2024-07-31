@@ -67,4 +67,7 @@ for i in range(len(X_test)):
 print(f'Test accuracy: {acc / len(X_test) * 100}%')
 
 test_acc = test(
-    model, X_test, y_test, 2
+    model, X_test, y_test, 200
+)
+print(test_acc)
+"""
