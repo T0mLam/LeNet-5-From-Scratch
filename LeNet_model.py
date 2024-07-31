@@ -12,6 +12,7 @@ from modules.optimizer import GradDesc, Adam
 from modules.regularization import Dropout
 from modules.normalization import BatchNorm
 from modules.pooling import AvgPool
+from constant import ASCII_BITMAP, C3_MAPPING
 
 
 composed_transform = transforms.Compose([
@@ -32,7 +33,7 @@ model = Sequential([
     Conv((32, 32), 128, 1, 6, 5), #c1
     AvgPool(2), #s2
     Tanh(),
-    Conv((14, 14), 128, 6, 16, 5), #c3
+    Conv((14, 14), 128, 6, 16, 5, mapping=C3_MAPPING), #c3
     AvgPool(2), #s4
     Tanh(), 
     Conv((5, 5), 128, 16, 120, 5), #c5

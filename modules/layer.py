@@ -37,17 +37,17 @@ class Linear(Layer):
             self.b = np.random.randn(out_dim)
     
     def forward(
-            self,
-            X: NDArray[Shape["*, *"], Number],
-            **kwargs
-        ) -> NDArray[Shape["*, *"], Number]:  
+        self,
+        X: NDArray[Shape["*, *"], Number],
+        **kwargs
+    ) -> NDArray[Shape["*, *"], Number]:  
         self.X = X
         return self.X @ self.W.T + self.b
     
     def backward(
-            self,
-            grad: NDArray[Shape["*, *"], Number]
-        ) -> NDArray[Shape["*, *"], Number]:
+        self,
+        grad: NDArray[Shape["*, *"], Number]
+    ) -> NDArray[Shape["*, *"], Number]:
         self.dW = grad.T @ self.X
         self.db = grad.sum(0)
         return grad @ self.W
@@ -61,6 +61,7 @@ class Conv(Layer):
         in_channel: int,
         out_channel: int, 
         kernel_size: int,
+        mapping: Optional[NDArray[Shape['*, *'], Number]]=None,
         init: Optional[Initialization]=None
     ) -> None:
         self.shape = shape
@@ -87,6 +88,11 @@ class Conv(Layer):
             self.K = init(self)
         else:
             self.K = np.random.randn(*self.kernel_shape)
+
+        if mapping:
+            self.mapping = mapping 
+        else:
+            self.mapping = None
     
     def forward(
         self, 
@@ -104,8 +110,13 @@ class Conv(Layer):
 
         for b in range(self.batch_size):
             for i in range(self.out_channel):
-                for j in range(self.in_channel):
-                    self.Y[b, i] = signal.correlate2d(
+                if self.mapping:
+                    in_channels = self.mapping[i]
+                else:
+                    in_channels = range(self.in_channel)
+
+                for j in in_channels:
+                    self.Y[b, i] += signal.correlate2d(
                         self.X[b, j], self.K[i, j], mode='valid'
                     )
                 
@@ -121,7 +132,12 @@ class Conv(Layer):
 
         for b in range(self.batch_size):
             for i in range(self.out_channel):
-                for j in range(self.in_channel):
+                if self.mapping:
+                    in_channels = self.mapping[i]
+                else:
+                    in_channels = range(self.in_channel)
+
+                for j in in_channels:
                     self.dK[i, j] = signal.correlate2d(
                         self.X[b, j], grad[b, i], mode='valid'
                     )
@@ -149,9 +165,46 @@ class Flatten(Layer):
         return grad.reshape(self.X_shape)
     
 
-class Reshape(Layer):
-    pass
-
-
 class RBF(Layer):
-    pass
+    def __init__(
+        self, 
+        in_dim: int, 
+        out_dim: int, 
+        W: NDArray[Shape["*, *, *"], Number]
+    ) -> None:
+        self.in_dim = in_dim
+        self.out_dim = out_dim
+        self.W = W
+
+    def forward(
+        self,
+        X: NDArray[Shape["*, *"], Number],
+        y: Optional[NDArray[Shape["*, *"], Number]]=None,
+        train: bool=True,
+        **kwargs
+    ) -> float:  
+        batch_size = self.X.shape[0]
+        self.Y = np.zeros(batch_size)
+
+        if y:
+            self.y = y
+        
+        for b in range(batch_size):
+            if train:
+                bitmap = self.W[y[b]]
+                diff = X[b] - bitmap
+                self.Y[b] = np.sum(np.power(diff, 2))
+            else:
+                z = np.zeros(len(self.W))
+                for i, bitmap in enumerate(self.W):
+                    diff = X[b] - bitmap
+                    z[i] = np.sum(np.power(diff, 2))
+                self.Y[b] = z.argmin()
+    
+        return self.Y
+
+    def backward(
+        self,
+        grad: NDArray[Shape["*, *"], Number]
+    ) -> NDArray[Shape["*, *"], Number]:
+        pass
