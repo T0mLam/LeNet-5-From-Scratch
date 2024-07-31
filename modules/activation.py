@@ -37,6 +37,22 @@ class Tanh(Layer):
         grad: NDArray[Any, Number]
     ) -> NDArray[Any, Number]:
         return grad * (1 - self.output ** 2)
+    
+
+class SquashedTanh(Layer):
+    def forward(
+        self, 
+        X: NDArray[Any, Number], 
+        **kwargs
+    ) -> NDArray[Any, Number]:
+        self.output = np.tanh(X * 2 / 3)
+        return 1.7159 * self.output
+
+    def backward(
+        self, 
+        grad: NDArray[Any, Number]
+    ) -> NDArray[Any, Number]:
+        return grad * 1.7159 * (1 - self.output ** 2) * 2 / 3
 
 
 class SoftMax(Layer):
