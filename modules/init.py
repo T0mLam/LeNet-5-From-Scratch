@@ -16,12 +16,12 @@ class Initialization(ABC):
 
 class Kaiming(Initialization):
     def __call__(
-            self,
-            layer: Union[Linear, Conv]
-        ) -> Union[
-            Tuple[NDArray[Shape["*, *"], Float], NDArray[Shape["*"], Float]],
-            NDArray[Shape["*, *, *, *"], Float]
-        ]:
+        self,
+        layer: Union[Linear, Conv]
+    ) -> Union[
+        Tuple[NDArray[Shape["*, *"], Float], NDArray[Shape["*"], Float]],
+        NDArray[Shape["*, *, *, *"], Float]
+    ]:
         if isinstance(layer, Linear):
             var = 2 / layer.in_dim
             W = np.random.randn(layer.out_dim, layer.in_dim) * np.sqrt(var)
@@ -36,12 +36,12 @@ class Kaiming(Initialization):
 
 class Xavier(Initialization):
     def __call__(
-            self,
-            layer: Union[Linear, Conv]
-        ) -> Union[
-            Tuple[NDArray[Shape["*, *"], Float], NDArray[Shape["*"], Float]],
-            NDArray[Shape["*, *, *, *"], Float]
-        ]:
+        self,
+        layer: Union[Linear, Conv]
+    ) -> Union[
+        Tuple[NDArray[Shape["*, *"], Float], NDArray[Shape["*"], Float]],
+        NDArray[Shape["*, *, *, *"], Float]
+    ]:
         if isinstance(layer, Linear):
             var = np.sqrt(6 / (layer.in_dim + layer.out_dim))
             W = np.random.uniform(-var, var, size=(layer.out_dim, layer.in_dim))
@@ -51,5 +51,26 @@ class Xavier(Initialization):
         if isinstance(layer, Conv):
             kernel_size = layer.kernel_size ** 2
             var = np.sqrt(6 / (layer.in_channel * kernel_size + layer.out_channel * kernel_size))
+            K = np.random.uniform(-var, var, size=layer.kernel_shape)
+            return K
+        
+    
+class LeCun(Initialization):
+    def __call__(
+        self,
+        layer: Union[Linear, Conv]
+    ) -> Union[
+        Tuple[NDArray[Shape["*, *"], Float], NDArray[Shape["*"], Float]],
+        NDArray[Shape["*, *, *, *"], Float]
+    ]:
+        if isinstance(layer, Linear):
+            var = 2.4 / layer.in_dim
+            W = np.random.uniform(-var, var, size=(layer.out_dim, layer.in_dim))
+            b = np.zeros(layer.out_dim)
+            return W, b
+        
+        if isinstance(layer, Conv):
+            fan_in = layer.kernel_size ** 2
+            var = np.sqrt(2.4 / fan_in)
             K = np.random.uniform(-var, var, size=layer.kernel_shape)
             return K

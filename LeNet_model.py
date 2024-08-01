@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from torchvision import datasets, transforms 
 
-from modules.activation import ReLU, SoftMax, Tanh
+from modules.activation import ReLU, SoftMax, Tanh, SquashedTanh
 from modules.criterion import MSE, CrossEntropy
 from modules.init import Xavier
 from modules.layer import Linear, Conv, Flatten
@@ -30,17 +30,20 @@ y_train = np.array([data[1] for data in train_dataset])[:2560]
 init_method = Xavier()
 
 model = Sequential([
+    # Conv Layers
     Conv((32, 32), 128, 1, 6, 5), #c1
     AvgPool(2), #s2
-    Tanh(),
+    SquashedTanh(),
     Conv((14, 14), 128, 6, 16, 5, mapping=C3_MAPPING), #c3
     AvgPool(2), #s4
-    Tanh(), 
+    SquashedTanh(), 
     Conv((5, 5), 128, 16, 120, 5), #c5
-    Tanh(),
+    SquashedTanh(),
+    
+    # FC Layers
     Flatten(),
     Linear(120, 84, init_method), #f6
-    Tanh(),
+    SquashedTanh(),
     Linear(84, 10, init_method), #output
     SoftMax()
 ])
