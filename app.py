@@ -5,31 +5,31 @@ from PIL import ImageGrab, ImageOps
 import cv2
 import matplotlib.pyplot as plt
 
-from modules.utils import load_model
+from modules.utils import load_model, preprocessing
 
 
 class DrawingCanvas(tk.Canvas):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
-        self.configure(height=400, width=400, bg='white')
+        self.configure(height=400, width=400, bg='black')
         self.bind('<B1-Motion>', self.draw)
         self.brush_size = 48.5
 
     def draw(self, event):
         x, y = event.x, event.y
         r = self.brush_size / 2
-        self.create_oval((x - r, y - r, x + r, y + r), fill='black')
+        self.create_oval((x - r, y - r, x + r, y + r), fill='white', outline='white')
     
     def clear(self):
         self.delete('all')
 
     def get_canvas(self):
         return ImageGrab.grab(bbox=(
-            self.winfo_rootx(),
-            self.winfo_rooty(),
-            self.winfo_rootx() + self.winfo_width(),
-            self.winfo_rooty() + self.winfo_height()
+            self.winfo_rootx() + 3,
+            self.winfo_rooty() + 3,
+            self.winfo_rootx() + self.winfo_width() - 3,
+            self.winfo_rooty() + self.winfo_height() - 3
         ))
 
 
@@ -92,13 +92,9 @@ class DigitRecognitionApp(tk.Tk):
 
     def predict(self):
         img = self.canvas.get_canvas()
-        img = img.resize((32, 32)).convert('L')
-        img = ImageOps.invert(img)
-        #img.save('pred.png')
-        img_array = np.array(img) / 255
-
+        img_arr = preprocessing(img)
         self.model.eval()
-        pred = self.model(img_array.reshape(1, 1, 32, 32)).argmax(axis=1)
+        pred = self.model(img_arr.reshape(1, 1, 32, 32)).argmax(axis=1)
         print(pred)
         
         
