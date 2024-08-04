@@ -75,6 +75,50 @@ class ButtonFrame(tk.Frame):
         self.reset_button.grid(row=0, column=1, padx=10, sticky='w')
 
 
+class PredictionLabel(ctk.CTkLabel):
+    def __init__(self, parent, app):
+        super().__init__(parent)
+        self.configure(
+            text='8',
+            text_color=('green', 'black'),
+            font=('Bold', 80)
+        )
+
+
+class ConfidenceLabel(ctk.CTkLabel):
+    def __init__(self, parent, app):
+        super().__init__(parent)
+        self.configure(
+            text='Confidence:',
+        )
+
+
+class ConfidenceBar(ctk.CTkProgressBar):
+    def __init__(self, parent, app):
+        super().__init__(parent)
+    
+
+class PredictionFrame(tk.Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.rowconfigure((0, 1), weight=1)
+        self.columnconfigure((0, 1), weight=1)
+
+        self.pred_label = PredictionLabel(self, parent)
+        self.pred_label.grid(row=0, column=0, rowspan=2, padx=40, sticky='ew')
+
+        self.conf_label = ConfidenceLabel(self, parent)
+        self.conf_label.grid(row=0, column=1, padx=10, sticky='ew')
+
+        self.conf_bar = ConfidenceBar(self, parent)
+        self.conf_bar.grid(row=1, column=1, padx=10, sticky='ew')
+
+    def update_prediction_labels(self, pred, prob):
+        self.pred_label.configure(text=pred)
+        self.conf_label.configure(text=f'Confidence: {prob}')
+        self.conf_bar.set(prob)
+
+
 class DigitRecognitionApp(tk.Tk):
     def __init__(self, model):
         super().__init__()
@@ -83,19 +127,27 @@ class DigitRecognitionApp(tk.Tk):
         self.resizable(False, False)
 
         self.canvas = DrawingCanvas(self)
-        self.canvas.pack(pady=40)
+        self.canvas.pack(pady=20)
 
         self.button_frame = ButtonFrame(self)
         self.button_frame.pack(pady=10, fill='x')
+
+        self.pred_frame = PredictionFrame(self)
+        self.pred_frame.pack(pady=40)
 
         self.model = load_model(model)
 
     def predict(self):
         img = self.canvas.get_canvas()
         img_arr = preprocessing(img)
+
         self.model.eval()
-        pred = self.model(img_arr.reshape(1, 1, 32, 32)).argmax(axis=1)
+        res = self.model(img_arr.reshape(1, 1, 32, 32))
+        pred = res.argmax(axis=1)[0]
+        prob = round(res[0, pred], 2)
+
         print(pred)
+        self.pred_frame.update_prediction_labels(pred, prob)
         
         
 if __name__ == '__main__':
