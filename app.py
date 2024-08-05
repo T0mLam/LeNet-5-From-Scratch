@@ -51,16 +51,13 @@ class ResetButton(ctk.CTkButton):
         self.canvas = app.canvas
         self.configure(
             text="Reset", 
-            command=self.reset_canvas, 
+            command=app.reset, 
             fg_color="red",
             hover_color='#8B0000',
             height=40,
 	        width=40,
             corner_radius=30
         )
-
-    def reset_canvas(self):
-        self.canvas.clear()
 
     
 class ButtonFrame(tk.Frame):
@@ -80,7 +77,10 @@ class PredictionLabel(ctk.CTkLabel):
         super().__init__(parent)
         self.configure(
             text='8',
-            text_color=('green', 'black'),
+            text_color='white',
+            fg_color='black',
+            width=120,
+            height=120,
             font=('Bold', 80)
         )
 
@@ -90,6 +90,7 @@ class ConfidenceLabel(ctk.CTkLabel):
         super().__init__(parent)
         self.configure(
             text='Confidence:',
+            font=('Bold', 12)
         )
 
 
@@ -97,32 +98,52 @@ class ConfidenceBar(ctk.CTkProgressBar):
     def __init__(self, parent, app):
         super().__init__(parent)
     
+    def update_progess(self, prob, current_value=0):
+        max_value = prob * 100
+        if current_value <= max_value:
+            self.set(current_value / 100)
+            current_value += 1 
+            self.after(5, self.update_progess, prob, current_value)
 
-class PredictionFrame(tk.Frame):
+
+class PredictionFrame(ctk.CTkFrame):
     def __init__(self, parent):
         super().__init__(parent)
+        self.configure(
+            corner_radius=50,  
+            fg_color="#e0e0e0"  
+        )
         self.rowconfigure((0, 1), weight=1)
         self.columnconfigure((0, 1), weight=1)
 
         self.pred_label = PredictionLabel(self, parent)
-        self.pred_label.grid(row=0, column=0, rowspan=2, padx=40, sticky='ew')
+        self.pred_label.grid(row=0, column=0, rowspan=2, padx=40, pady=20)
 
         self.conf_label = ConfidenceLabel(self, parent)
-        self.conf_label.grid(row=0, column=1, padx=10, sticky='ew')
+        self.conf_label.grid(row=0, column=1, padx=(0, 40), sticky='ew')
 
         self.conf_bar = ConfidenceBar(self, parent)
-        self.conf_bar.grid(row=1, column=1, padx=10, sticky='ew')
+        self.conf_bar.grid(row=1, column=1, padx=(0, 40), sticky='new')
 
     def update_prediction_labels(self, pred, prob):
         self.pred_label.configure(text=pred)
-        self.conf_label.configure(text=f'Confidence: {prob}')
-        self.conf_bar.set(prob)
+        self.conf_label.configure(text=f'Confidence: {int(prob * 100)}%')
+        self.conf_bar.update_progess(prob)
+        self.conf_bar.configure(progress_color=self.label_color(prob))
 
+    def label_color(self, prob):
+        if prob > 0.85:
+            return 'green'
+        elif prob > 0.5:
+            return '#FFBF00'
+        else:
+            return 'red'
+        
 
 class DigitRecognitionApp(tk.Tk):
     def __init__(self, model):
         super().__init__()
-        self.title('Digit Recognition')
+        self.title('Digit Recognition App')
         self.geometry('600x800')
         self.resizable(False, False)
 
@@ -133,7 +154,6 @@ class DigitRecognitionApp(tk.Tk):
         self.button_frame.pack(pady=10, fill='x')
 
         self.pred_frame = PredictionFrame(self)
-        self.pred_frame.pack(pady=40)
 
         self.model = load_model(model)
 
@@ -148,6 +168,10 @@ class DigitRecognitionApp(tk.Tk):
 
         print(pred)
         self.pred_frame.update_prediction_labels(pred, prob)
+        self.pred_frame.pack(pady=40)
+
+    def reset(self):
+        self.canvas.clear()
         
         
 if __name__ == '__main__':
