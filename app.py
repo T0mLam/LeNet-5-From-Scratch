@@ -90,7 +90,8 @@ class ConfidenceLabel(ctk.CTkLabel):
         super().__init__(parent)
         self.configure(
             text='Confidence:',
-            font=('Bold', 12)
+            font=('Helvetica', 18, 'bold'),
+            text_color='#636363'
         )
 
 
@@ -126,7 +127,7 @@ class PredictionFrame(ctk.CTkFrame):
         self.conf_bar.grid(row=1, column=1, padx=(0, 40), sticky='new')
 
     def update_prediction_labels(self, pred, prob):
-        self.pred_label.configure(text=pred)
+        self.pred_label.configure(text=pred, text_color='white')
         self.conf_label.configure(text=f'Confidence: {int(prob * 100)}%')
         self.conf_bar.update_progess(prob)
         self.conf_bar.configure(progress_color=self.label_color(prob))
@@ -139,6 +140,11 @@ class PredictionFrame(ctk.CTkFrame):
         else:
             return 'red'
         
+    def update_empty_prediction_labels(self):
+        self.pred_label.configure(text_color='black')
+        self.conf_label.configure(text=f'Confidence: -')
+        self.conf_bar.update_progess(0)
+
 
 class DigitRecognitionApp(tk.Tk):
     def __init__(self, model):
@@ -158,8 +164,14 @@ class DigitRecognitionApp(tk.Tk):
         self.model = load_model(model)
 
     def predict(self):
+        self.pred_frame.pack(pady=40)
+        
         img = self.canvas.get_canvas()
         img_arr = preprocessing(img)
+
+        if isinstance(img_arr, int):
+            self.pred_frame.update_empty_prediction_labels()
+            return 
 
         self.model.eval()
         res = self.model(img_arr.reshape(1, 1, 32, 32))
@@ -168,8 +180,7 @@ class DigitRecognitionApp(tk.Tk):
 
         print(pred)
         self.pred_frame.update_prediction_labels(pred, prob)
-        self.pred_frame.pack(pady=40)
-
+        
     def reset(self):
         self.canvas.clear()
         

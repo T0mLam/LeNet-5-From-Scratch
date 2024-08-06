@@ -33,6 +33,9 @@ def preprocessing(img: Image.Image) -> NDArray[Any, Number]:
     img = img.convert('1')
     img_arr = np.asarray(img, dtype=np.float_)
 
+    if img_arr.max() == 0:
+        return -1
+
     while img_arr[0, :].max() == 0:
         img_arr = img_arr[1:, :]
 
