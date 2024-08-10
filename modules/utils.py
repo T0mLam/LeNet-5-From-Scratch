@@ -10,7 +10,6 @@ from PIL import Image
 import cv2
 
 
-
 def save_model(model: Sequential, filename: str) -> bool:
     with open(filename, 'wb') as f:
         pickle.dump(model, f)

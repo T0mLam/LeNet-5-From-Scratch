@@ -178,7 +178,6 @@ class DigitRecognitionApp(tk.Tk):
         pred = res.argmax(axis=1)[0]
         prob = round(res[0, pred], 2)
 
-        print(pred)
         self.pred_frame.update_prediction_labels(pred, prob)
         
     def reset(self):
