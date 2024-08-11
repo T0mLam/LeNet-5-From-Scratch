@@ -1,9 +1,6 @@
 import tkinter as tk
 import customtkinter as ctk
-import numpy as np
-from PIL import ImageGrab, ImageOps
-import cv2
-import matplotlib.pyplot as plt
+from PIL import ImageGrab
 
 from modules.utils import load_model, preprocessing
 
@@ -185,5 +182,5 @@ class DigitRecognitionApp(tk.Tk):
         
         
 if __name__ == '__main__':
-    app = DigitRecognitionApp(model='models/model_10ep.pkl')
+    app = DigitRecognitionApp(model='models/model_20ep.pkl')
     app.mainloop()
