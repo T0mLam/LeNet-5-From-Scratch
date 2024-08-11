@@ -17,13 +17,14 @@ This repository contains the implementation of LeNet-5 Convolutional Neural Netw
 
 ## Installation
 ### Clone the Repository
-
 ```bash
 git clone https://github.com/T0mLam/LeNet-5-from-scratch.git
 cd LeNet-5-from-scratch
 ```
-
 ### Install dependencies
+```bash
+pip install -r requirements.txt
+```
 
 
 ## Usage
@@ -32,6 +33,22 @@ cd LeNet-5-from-scratch
 python -m app.py
 ```
 ### Import and use the modules
+Create a new file `experiment.py`
 
+```python
+# Use the format 'from modules.{filename} import {module}'
+
+# e.g. import the Adam optimizer
+from modules.optimizer import Adam
+...
+optimizer = Adam(model, lr=0.001)
+
+```
+
+Run the script
+```bash
+python -m experiment.py
+```
 
 ## Acknowledgements
+- Yann Lecun for the [LeNet paper](https://ieeexplore.ieee.org/document/726791)
