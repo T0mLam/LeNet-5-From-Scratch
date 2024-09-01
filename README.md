@@ -1,4 +1,4 @@
-# LeNet-5-from-scratch (in-progress)
+# LeNet-5 From Scratch 
 
 This repository contains the implementation of LeNet-5 Convolutional Neural Network (CNN) Architecture from scratch using numpy. LeNet-5 is a pioneering architecture in the field of deep learning, particularly for handwritten digit classification on the MNIST dataset, developed in the 90s by Yann LeCun.
 
