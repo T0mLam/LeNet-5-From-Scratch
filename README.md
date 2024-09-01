@@ -33,7 +33,7 @@ pip install -r requirements.txt
 ## Usage
 ### Launch the app
 ```bash
-python -m app.py
+python -m app
 ```
 ### Import and use the modules
 Create a new file `experiment.py`
@@ -50,7 +50,7 @@ optimizer = Adam(model, lr=0.001)
 
 Run the script
 ```bash
-python -m experiment.py
+python -m experiment
 ```
 
 ## Acknowledgements
